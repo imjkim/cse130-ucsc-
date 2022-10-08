@@ -22,13 +22,13 @@ char** split(char* file, const char delim){
 int main(int argc, char* argv[]){
     int error = 0;
     if(argc < 3){
-        warnx("%s\nusage: %s%s\n", "not enough arguments", argv[0], " <files> <delimiter>");
+        warnx("%s\nusage: %s%s", "not enough arguments", argv[0], " <files> <delimiter>");
         error = 1;
     } 
     else {
         char* delim = argv[argc-1];
         if(strlen(delim) != 1){
-            warnx("%s\nusage: %s%s\n", "only single-character delimiters allowed", argv[0]," <files> <delimiter>");
+            warnx("%s\nusage: %s%s", "only single-character delimiters allowed", argv[0]," <files> <delimiter>");
             error = 1;
         }
         char value = delim[0];
@@ -41,29 +41,26 @@ int main(int argc, char* argv[]){
                 mode = 1;
             } 
             else if(!((mode == 1)&& (i == argc-2))&&(access(argv[i], F_OK) == 0)){          // confrim file is valid
-                int j = 0;
                 char ch = 0;
                 int fd = open(argv[i], O_RDONLY);
-                int countbuff=0;
                 char *buff = (char*)malloc(sizeof(char)*2048);
                 int count = read(fd, buff, 2048);
                 // printf("\n value is %c and asci is %d", value, value);
                 while(count !=0){
                     for (int i =0; i < count; i++){
                         ch = buff[i];
-                        if((ch >= 0) && (ch< 128)){
                         //printf("\n\n ch is %c and asci is %d", ch, ch);
-                            if(ch == value){
-                                buff[i] = '\n';
-                            // write(STDOUT_FILENO, "\n",1);
-                            //printf("\n");
-                            } 
+                        if(ch == value){
+                            buff[i] = '\n';
+                        // write(STDOUT_FILENO, "\n",1);
+                        //printf("\n"); 
                         }
                     }
                     write(STDOUT_FILENO, buff,count);
                     count = read(fd, buff, 2048); 
                 }
                 free(buff);
+                close(fd);
             } else{
                 warnx("%s: %s\n",argv[i], "No such file or directory");
                 error =1;
@@ -76,26 +73,24 @@ int main(int argc, char* argv[]){
                 int ch1 = read(STDIN_FILENO, buf, 4096);
                 int len = ch1;
                 if(ch1 == 0){
-                    len = 4096;
+                    return 0;
                 }
                 for(int i = 0; i < len; i++){
                     char ch = buf[i];
-                     if((ch >= 0) && (ch< 128)){
-                        //printf("\n\n ch is %c and asci is %d", ch, ch);
-                        if(ch == value){
-                            printf("\n");
-                        } 
-                        else {
-                            printf("%c", ch);
-                        }
+                    //printf("\n\n ch is %c and asci is %d", ch, ch);
+                    if(ch == value){
+                        buf[i] = '\n'; 
                     } 
-                    else {
-                        printf("%d", ch);
-                    }
                 }
+                int ret = write(STDOUT_FILENO, buf,len);
                 free(buf);
+                if(ret == 0){
+                    close(STDIN_FILENO);
+                    return 0;
+                }
+                
             }
-            printf("\n");
+            close(STDIN_FILENO);
         }
     }
     return error;
