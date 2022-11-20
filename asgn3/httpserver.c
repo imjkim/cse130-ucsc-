@@ -415,6 +415,7 @@ int main(int argc, char* argv[]){
 
             } else if (strcmp(command, "GET") == 0){
                 //GET /1234.txt HTTP/1.1\r\n\r\n
+                int restis = 0;
                 char *filename = (char*)malloc(sizeof(char)*1024);
                 char *version = (char*)malloc(sizeof(char)*16);
                 char *rest = (char*)malloc(sizeof(char)*2048);
@@ -423,6 +424,11 @@ int main(int argc, char* argv[]){
                 int read = sscanf(line, "%s %s %s%*[\r\n]%2048c", command, filename, version, rest);
                 int expect;
                 if(strlen(rest) != 0){
+                    if( (strstr(rest, "User-Agent:") == NULL) &&(strstr(rest, "Accept:") == NULL) &&
+                    (strstr(rest, "Request-Id:") == NULL) && (strstr(rest, "Host:") == NULL) &&
+                    (strstr(rest, "Expect:") == NULL)&&(strstr(rest, "Content-Length:") == NULL)&&(strstr(rest, "k:") == NULL) ){
+                        restis = 1;
+                    }
                     char *trash = (char*)malloc(sizeof(char)*2048);
                     int restlen= strlen(rest);
                     printf("restlen is %d\n", restlen);
@@ -454,7 +460,7 @@ int main(int argc, char* argv[]){
                     badRequest(fd, "HTTP/1.1");
                 } else if(strcmp(version, "HTTP/1.1") != 0 ){
                     badRequest(fd, "HTTP/1.1");
-                } else if(strlen(rest) != 0){
+                } else if(restis == 1){
                     //printf("garbageSize is %d\n", garbageSize);
                     //printf("garbage is %s\n", garbage);
                     badRequest(fd, "HTTP/1.1");
