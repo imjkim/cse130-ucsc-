@@ -30,6 +30,7 @@ int targ = 0;
 int logfd = 0;
 
 void badRequest(int socket, char* version){
+    printf("just bad request");
     char *badStatusLine = (char*)malloc(sizeof(char)*1024);
     char *badHeaderField =  (char*)malloc(sizeof(char)*2048);
     char *badMessageBody =  (char*)malloc(sizeof(char)*1024);
@@ -59,7 +60,7 @@ void put(int socket, char* filename,char* version, char* message, int length, in
    struct stat statbuf;
    stat(tmp, &statbuf);
    int ret = 0;
-   if((S_ISDIR(statbuf.st_mode) == 1) || !(statbuf.st_mode & S_IWUSR)) {
+   if((S_ISDIR(statbuf.st_mode) == 1) || ((exist == 1) &&!(statbuf.st_mode & S_IWUSR))) {
        status = 403;
    } else{
        int fd = open(tmp, O_WRONLY|O_CREAT|O_TRUNC);
